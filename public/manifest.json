@@ -17,7 +17,7 @@
     "default_title": "Tab_stash",
     "default_popup": "popup.html"
   },
-  "permissions": ["storage", "bookmarks"],
+  "permissions": ["storage", "bookmarks", "tabs"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],

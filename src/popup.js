@@ -2,14 +2,34 @@
 
 import "./popup.css";
 
-let tar = document.getElementById("app");
+let stashId = 0;
+chrome.bookmarks.search({ title: "Stash" }, (e) => (stashId = e[0].id));
 
-tar.innerHTML = "Hello World";
+let add_ext = () => {
+  chrome.tabs.query({ pinned: false }, (tabs) => {
+    tabs = tabs.filter((tab) => tab.title != "New tab");
+    tabs.forEach((tab) => {
+      chrome.bookmarks.create({
+        parentId: stashId,
+        title: tab.title,
+        url: tab.url,
+      });
+    });
+  });
+};
 
-chrome.bookmarks.create({ title: "Stash" }, function (newFolder) {
-  console.log(newFolder);
-});
-let arr = ["2"];
-chrome.bookmarks.getChildren("1", (e) => {
-  e.forEach((x) => console.log(x.title));
-});
+let remove_ext = () => {
+  chrome.bookmarks.getChildren(stashId, (tabs) => {
+    tabs.forEach((tab) => {
+      chrome.bookmarks.remove(tab.id);
+      chrome.tabs.query({ title: tab.title }, (q) => {
+        if (q.length == 0) {
+          chrome.tabs.create({ url: tab.url });
+        }
+      });
+    });
+  });
+};
+
+document.getElementById("remove").addEventListener("click", remove_ext);
+document.getElementById("add").addEventListener("click", add_ext);
